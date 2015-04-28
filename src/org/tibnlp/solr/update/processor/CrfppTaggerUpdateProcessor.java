@@ -1,4 +1,4 @@
-package org.soas.solr.update.processor;
+package org.tibnlp.solr.update.processor;
 
 import org.chasen.crfpp.Tagger;
 

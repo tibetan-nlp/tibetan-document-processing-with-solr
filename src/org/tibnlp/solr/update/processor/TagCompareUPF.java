@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.soas.solr.update.processor;
+package org.tibnlp.solr.update.processor;
 
 import org.apache.solr.update.processor.UpdateRequestProcessorFactory;
 import org.apache.solr.update.processor.UpdateRequestProcessor;

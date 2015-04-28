@@ -1,4 +1,4 @@
-package org.thdl.tib.solr;
+package org.tibnlp.solr.update.processor;
 
 import java.util.List;
 import java.util.LinkedList;
