@@ -21,7 +21,7 @@ import org.apache.solr.response.SolrQueryResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.thdl.tib.solr.util.TshegBarUtils;
+import org.tibnlp.util.TshegBarUtils;
 
 public class SyllableFinalUPF extends FieldMutatingUpdateProcessorFactory {
     private final static Logger log = LoggerFactory.getLogger(SyllableFinalUPF.class);

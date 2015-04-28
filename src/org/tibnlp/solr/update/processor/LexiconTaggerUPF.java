@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LexiconTaggerUPF extends FieldMutatingUpdateProcessorFactory {
-    private final static Logger log = LoggerFactory.getLogger(Tt4jTaggerUpdateProcessor.class);
+    private final static Logger log = LoggerFactory.getLogger(LexiconTaggerUPF.class);
     
     private static final String LEXICON_PARAM = "lexicon";
     

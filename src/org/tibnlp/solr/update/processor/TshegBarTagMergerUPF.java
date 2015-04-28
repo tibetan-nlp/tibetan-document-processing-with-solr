@@ -1,6 +1,6 @@
 package org.tibnlp.solr.update.processor;
 
-import org.thdl.tib.solr.util.TshegBarUtils;
+import org.tibnlp.util.TshegBarUtils;
 
 import java.util.Set;
 import java.util.HashSet;
