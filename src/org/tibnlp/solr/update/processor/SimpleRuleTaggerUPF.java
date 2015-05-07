@@ -3,6 +3,8 @@ package org.tibnlp.solr.update.processor;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -27,7 +29,8 @@ public class SimpleRuleTaggerUPF extends FieldMutatingUpdateProcessorFactory {
     private final static Logger log = LoggerFactory.getLogger(SimpleRuleTaggerUPF.class);
     
     private static final String RULES_PARAM = "rules";
-    private List<String> rules = new LinkedList<String>();
+    private List<Pattern> patterns = new LinkedList<Pattern>();
+    private List<String> replaces = new LinkedList<String>();
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -44,7 +47,16 @@ public class SimpleRuleTaggerUPF extends FieldMutatingUpdateProcessorFactory {
                 String line;
                 while ((line = br.readLine()) != null) {
                     if (!(line.startsWith("#") || line.length()==0)) { //ignore
-                        rules.add(line);
+                        String[] rule = line.split(">");
+                        try {
+                            log.info("Compiling: " + line);
+                            patterns.add(Pattern.compile(rule[0].trim()));
+                            replaces.add(rule[1].trim());
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                            //error
+                        }
                     }
                 }
             }
@@ -68,10 +80,12 @@ public class SimpleRuleTaggerUPF extends FieldMutatingUpdateProcessorFactory {
                     CharSequence s = (CharSequence)src;
                     String tString = s.toString();
                     
-                    Iterator<String> iter = rules.iterator();
+                    Iterator<Pattern> iter = patterns.iterator();
+                    Iterator<String> iter2 = replaces.iterator();
                     while (iter.hasNext()) {
-                        String[] rule = iter.next().split(">");
-                        tString = tString.replaceAll(rule[0].trim(), rule[1].trim());
+                        Pattern pattern = iter.next();
+                        String replace = iter2.next();
+                        tString = pattern.matcher(tString).replaceAll(replace);
                     }
                     
                     return tString;

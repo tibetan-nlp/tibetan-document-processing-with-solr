@@ -54,7 +54,10 @@ public class CrfppTaggerUpdateProcessor extends UpdateRequestProcessor {
 	
 	public static final String GUESS_PARAM = "guess";
 	private String guessFieldName;
-	
+
+    public static final String PROB_PARAM = "probabilities";
+    private String probabilities;
+
 	protected SolrParams defaults;
 	protected SolrParams appends;
 	protected SolrParams invariants;
@@ -70,6 +73,7 @@ public class CrfppTaggerUpdateProcessor extends UpdateRequestProcessor {
 	        pathFieldName = params.get(PATH_PARAM, "");
 	        model = params.get(MODEL_PARAM, "");
 	        guessFieldName = params.get(GUESS_PARAM, "");
+            probabilities = params.get(PROB_PARAM, "");
 	        uuidFieldName = params.get(UUID_PARAM, "");
 	        
 	        if (null != params.get(FOLDS_PARAM)) {
@@ -129,7 +133,7 @@ public class CrfppTaggerUpdateProcessor extends UpdateRequestProcessor {
                         
                         //use lm extension for language model
                         //Tagger tagger = new Tagger("-m " + modelFile + " -v 3 -n2");
-                        Tagger tagger = new Tagger("-v1 -m " + modelFile);
+                        Tagger tagger = new Tagger("-v2 -m " + modelFile);
                         tagger.clear();
 
                         for (int i=0; i<syllables.length; i++) {
@@ -138,18 +142,27 @@ public class CrfppTaggerUpdateProcessor extends UpdateRequestProcessor {
                         }
                         
                         if (tagger.parse()) {
-                            List<String> tags = new LinkedList<String>();
-                              
+                            List<String> guesses = new LinkedList<String>();
+
                             for (int i = 0; i < tagger.size(); ++i) {
                                 String tag = "";
                                 for (int j = 0; j < tagger.xsize(); ++j) {
                                     tag = tag + tagger.x(i, j) + tagDelimiter;
                                 }
                                 tag = tag + tagger.y2(i);
-                                tags.add(tag);
+
+                                if (probabilities.equals("all")) {
+                                    tag = tag + ":" + tagger.prob(i) + "|";
+                                    tag = tag + tagger.yname(0) + ":" + tagger.prob(i,0);
+                                    for (int j = 1; j < tagger.ysize(); ++j) {
+                                        tag = tag + "~" + tagger.yname(j) + ":" + tagger.prob(i,j);
+                                    }
+                                }
+
+                                guesses.add(tag);
                             }
                               
-                            String result = StringUtils.join(tags.iterator(), delimitOutput);
+                            String result = StringUtils.join(guesses.iterator(), delimitOutput);
                             guessField.setValue(result, 1.0f);
                             doc.put(field, guessField);
                         }
