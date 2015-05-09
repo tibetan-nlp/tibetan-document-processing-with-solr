@@ -27,14 +27,16 @@ import org.slf4j.LoggerFactory;
 
 public class LexiconTaggerUPF extends FieldMutatingUpdateProcessorFactory {
     private final static Logger log = LoggerFactory.getLogger(LexiconTaggerUPF.class);
-    
+
     private static final String LEXICON_PARAM = "lexicon";
-    
+
 	private static final String TAG_DELIMITER_PARAM = "tagDelimiter";
     private static final String TAG_DELIMITER_DEFAULT = "|";
 	private static final String DELIMIT_OUTPUT_PARAM = "delimitOutput";
 	private static final String DELIMIT_OUTPUT_DEFAULT = " ";
-    private String tagDelimiter, delimitOutput;
+    private static final String OOV_TAG_PARAM = "oov";
+    private static final String OOV_TAG_DEFAULT = "undefined";
+    private String tagDelimiter, delimitOutput, oovTag;
     private HashMap<String,String> lexicon = new HashMap();
     
     
@@ -56,6 +58,14 @@ public class LexiconTaggerUPF extends FieldMutatingUpdateProcessorFactory {
 	    else {
 	        delimitOutput = (String)delimitOutputParam;
 	    }
+
+        Object oovTagParam = args.remove(OOV_TAG_PARAM);
+        if (null == oovTagParam || !(oovTagParam instanceof String)) {
+            oovTag = "[" + OOV_TAG_DEFAULT + "]";
+        }
+        else {
+            oovTag = "[" + (String)oovTagParam + "]";
+        }
 	
 	    Object lexiconParam = args.remove(LEXICON_PARAM);
 	    if (null == lexiconParam || !(lexiconParam instanceof String)) {
@@ -105,22 +115,12 @@ public class LexiconTaggerUPF extends FieldMutatingUpdateProcessorFactory {
                     for (int j=0; j<in.length; j++) {
                         int k = in[j].indexOf('|');
                         if (k == -1) {
-                            if (lexicon.containsKey(in[j])) {
-                                out.add(in[j] + tagDelimiter + lexicon.get(in[j]));
-                            }
-                            else {
-                                out.add(in[j]);
-                            }
+                            out.add(in[j] + tagDelimiter + (lexicon.containsKey(in[j]) ? lexicon.get(in[j]) : oovTag));
                         }
                         else {
                             String word = in[j].substring(0,k);
                             String pos =  in[j].substring(k+1);
-                            if (lexicon.containsKey(word)) {
-                                out.add(word + tagDelimiter + lexicon.get(word) + tagDelimiter + pos);
-                            }
-                            else {
-                                out.add(word + tagDelimiter + pos);
-                            }
+                            out.add(word + tagDelimiter + (lexicon.containsKey(word) ? lexicon.get(word) : oovTag) + tagDelimiter + pos);
                         }
                     }
                     

@@ -147,16 +147,21 @@ public class CrfppTaggerUpdateProcessor extends UpdateRequestProcessor {
                             for (int i = 0; i < tagger.size(); ++i) {
                                 String tag = "";
                                 for (int j = 0; j < tagger.xsize(); ++j) {
-                                    tag = tag + tagger.x(i, j) + tagDelimiter;
+                                    tag = tag + tagger.x(i,j) + tagDelimiter;
                                 }
                                 tag = tag + tagger.y2(i);
 
-                                if (probabilities.equals("all")) {
-                                    tag = tag + ":" + tagger.prob(i) + "|";
-                                    tag = tag + tagger.yname(0) + ":" + tagger.prob(i,0);
+                                if (probabilities.startsWith("all")) {
+                                    boolean allMinusOne = probabilities.equals("allminusone") ? true : false;
+
+                                    tag = tag + ":" + (int)(tagger.prob(i)*1000) + "(";
+                                    tag = tag + tagger.yname(0) + "@" + (int)(tagger.prob(i,0)*1000);
                                     for (int j = 1; j < tagger.ysize(); ++j) {
-                                        tag = tag + "~" + tagger.yname(j) + ":" + tagger.prob(i,j);
+                                        if (!(allMinusOne && tagger.yname(j).equals(tagger.y2(i)))) {
+                                            tag = tag + "~" + tagger.yname(j) + ":" + (int)(tagger.prob(i,j)*1000);
+                                        }
                                     }
+                                    tag = tag + ")";
                                 }
 
                                 guesses.add(tag);
