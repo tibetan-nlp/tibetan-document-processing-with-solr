@@ -1,5 +1,8 @@
 package org.tibnlp.solr.update.processor;
 
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Arrays;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.regex.*;
@@ -28,6 +31,7 @@ public class SyllableFinalUPF extends FieldMutatingUpdateProcessorFactory {
     
 	private static final String TAG_DELIMITER_PARAM = "tagDelimiter";
 	private static final String DELIMIT_OUTPUT_PARAM = "delimitOutput";
+    private static final String RESTRICT_LAST_PARAM = "restrictLast";
 	private static final String LAST_PARAM = "last";
 	private static final String TSHEG_PARAM = "tsheg";
 	private static final String LENGTH_PARAM = "length";
@@ -42,8 +46,9 @@ public class SyllableFinalUPF extends FieldMutatingUpdateProcessorFactory {
     private static final boolean LENGTH_DEFAULT = true;
     private static final boolean SYLLABLECOUNT_DEFAULT = true;
     private static final boolean SYLLABLES_DEFAULT = true;
-    
+
     private String tagDelimiter, delimitOutput;
+    private Set<String> restrictLast;
     private boolean enableLast, enableLength, enableTsheg, enableSyllablecount, enableSyllables;
     
     public static Pattern finalpattern = Pattern.compile("\\S+([^\\p{Mn}\\p{P}]\\p{Mn}*)\u0f0b?");
@@ -67,7 +72,15 @@ public class SyllableFinalUPF extends FieldMutatingUpdateProcessorFactory {
 	    else {
 	        delimitOutput = (String)delimitOutputParam;
 	    }
-	    
+
+        Object restrictLastParam = args.remove(RESTRICT_LAST_PARAM);
+        if (null == restrictLastParam || !(restrictLastParam instanceof String)) {
+            restrictLast = new HashSet<String>();
+        }
+        else {
+            restrictLast = new HashSet<String>(Arrays.asList(StringUtils.split((String)restrictLastParam)));
+        }
+
 	    Object lastParam = args.remove(LAST_PARAM);
 	    if (null == lastParam || !(lastParam instanceof Boolean)) {
 	        enableLast = LAST_DEFAULT;
@@ -134,7 +147,12 @@ public class SyllableFinalUPF extends FieldMutatingUpdateProcessorFactory {
                         int tsheg = TshegBarUtils.isTshegBar(word.charAt(word.length()-1)) ? 1 : 0;
                         if (enableLast) {
                             Matcher m = finalpattern.matcher(word);
-                            sb.append(tagDelimiter + (m.matches() ? m.group(1) : "0"));
+                            if (restrictLast.isEmpty()) {
+                                sb.append(tagDelimiter + (m.matches() ? m.group(1) : "0"));
+                            }
+                            else {
+                                sb.append(tagDelimiter + (m.matches() && restrictLast.contains(m.group(1)) ? m.group(1) : "0"));
+                            }
                             //sb.append(tagDelimiter + word.substring(word.length()-1-tsheg, word.length()-tsheg)); //last character of word
                         }
                         if (enableTsheg) {

@@ -76,7 +76,7 @@ public class TshegBarTagMergerUPF extends FieldMutatingUpdateProcessorFactory {
                     
                     int j = 0;
                     for (; j<tokens.length-1; j++) {
-                        if (ifNext.contains(tokens[j+1]) && TshegBarUtils.isOpenEnded(tokens[j].charAt(tokens[j].length()-1))) {
+                        if (ifNext.contains(tokens[j+1]) && TshegBarUtils.isOpenEnded(tokens[j].charAt(tokens[j].indexOf('|')-1))) {
                             String[] a = tokens[j].split("\\|");
                             String[] b = tokens[j+1].split("\\|");
                             syllables.add(a[0] + b[0] + "|" + a[1] + b[1]);

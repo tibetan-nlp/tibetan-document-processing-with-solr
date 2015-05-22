@@ -5,6 +5,7 @@ import org.chasen.crfpp.Tagger;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import org.apache.commons.lang3.StringUtils;
@@ -151,17 +152,17 @@ public class CrfppTaggerUpdateProcessor extends UpdateRequestProcessor {
                                 }
                                 tag = tag + tagger.y2(i);
 
-                                if (probabilities.startsWith("all")) {
+                                if (probabilities.equals("all")) {
                                     boolean allMinusOne = probabilities.equals("allminusone") ? true : false;
 
                                     tag = tag + ":" + (int)(tagger.prob(i)*1000) + "(";
-                                    tag = tag + tagger.yname(0) + "@" + (int)(tagger.prob(i,0)*1000);
-                                    for (int j = 1; j < tagger.ysize(); ++j) {
-                                        if (!(allMinusOne && tagger.yname(j).equals(tagger.y2(i)))) {
-                                            tag = tag + "~" + tagger.yname(j) + ":" + (int)(tagger.prob(i,j)*1000);
+                                    List<String> tagProbs = new ArrayList<String>();
+                                    for (int j = 0; j < tagger.ysize(); ++j) {
+                                        if (!tagger.yname(j).equals(tagger.y2(i))) {
+                                            tagProbs.add(tagger.yname(j) + ":" + (int)(tagger.prob(i,j)*1000));
                                         }
                                     }
-                                    tag = tag + ")";
+                                    tag = tag + StringUtils.join(tagProbs, "~") + ")";
                                 }
 
                                 guesses.add(tag);
